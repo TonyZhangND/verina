@@ -2,7 +2,7 @@
 output_dir: "output/benchmark"
 model_name: "claude-sonnet-4-5"
 provider: "anthropic"
-rounds: 1
+rounds: 3
 api_base: null
 processes: 1
 rm: true
