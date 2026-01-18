@@ -184,6 +184,7 @@ def get_anthropic_model(model_name: str, max_tokens: Optional[int]) -> dspy.LM:
         "claude-3-7-sonnet-20250219": {"temperature": 1.0, "max_tokens": max_tokens},
         "claude-sonnet-4-5-20250514": {"temperature": 1.0, "max_tokens": max_tokens},
         "claude-sonnet-4-5-20250929": {"temperature": 1.0, "max_tokens": max_tokens},
+        "claude-haiku-4-5-20251001": {"temperature": 1.0, "max_tokens": max_tokens},
     }
 
     if model_name not in model_configs:
