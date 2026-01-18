@@ -1,0 +1,15 @@
+# Default configuration for benchmark experiments
+output_dir: "output/benchmark"
+model_name: "claude-sonnet-4-5"
+provider: "anthropic"
+rounds: 1
+api_base: null
+processes: 1
+rm: true
+# Task configuration
+task_config:
+  code_gen: false
+  spec_gen: false
+  proof_gen: true
+  code_spec_gen: false
+  code_spec_proof_gen: false
