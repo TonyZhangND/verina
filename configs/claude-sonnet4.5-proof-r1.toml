@@ -1,5 +1,5 @@
 output_dir = "output/claude-sonnet-4.5-proof-64"
-max_workers = 64
+max_workers = 1
 rounds = 1
 fewshot_example_names = ["verina_basic_15", "verina_basic_44"]
 
@@ -19,7 +19,7 @@ model_name = "claude-sonnet-4-5-20250929"
 [baseline_config]
 name = "proof_refinement"
 resume_from_checkpoint = true
-refinements = 64
+refinements = 1
 
 [eval_spec_config]
 formal_proving = false
