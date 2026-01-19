@@ -16,6 +16,7 @@ from verina.benchmark.common import BenchmarkRunConfig, ExperimentId
 from verina.benchmark.report import EvaluationRoundsReport
 from verina.dataset.dataset import load_dataset
 from verina.dataset.schema import BenchmarkData
+from verina.lean import clean_playground
 
 load_dotenv(override=True)
 
@@ -76,7 +77,7 @@ def main(
 
     dataset = load_dataset()
 
-    # clean_playground()
+    clean_playground()
     Path(config.output_dir).mkdir(parents=True, exist_ok=True)
 
     fewshot_examples, dataset = get_split_by_data_id(
