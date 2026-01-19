@@ -11,6 +11,7 @@ from dspy import (
 )
 from rich import print
 
+from verina.utils.lm import retry_on_rate_limit
 from verina.benchmark.solution import (
     FewshotExample,
     GenCodeInput,
@@ -113,6 +114,7 @@ def code_task_template_from_input(input: GenCodeInput) -> str:
     return f"```lean4\n{rendered}```"
 
 
+@retry_on_rate_limit()
 async def dspy_generate_code(
     dspy_module: Type[Module],
     input: GenCodeInput,
@@ -211,6 +213,7 @@ def spec_task_template_from_input(input: GenSpecInput) -> str:
     return f"```lean4\n{rendered}```"
 
 
+@retry_on_rate_limit()
 async def dspy_generate_spec(
     dspy_module: Type[Module],
     input: GenSpecInput,
@@ -363,6 +366,7 @@ def proof_task_template_from_input(input: GenProofInput) -> str:
     return f"```lean4\n{rendered}```"
 
 
+@retry_on_rate_limit()
 async def dspy_generate_proof(
     dspy_module: Type[Module],
     input: GenProofInput,
@@ -393,6 +397,7 @@ async def dspy_generate_proof(
 
 
 # Do not support fewshot examples for refinement
+@retry_on_rate_limit()
 async def dspy_generate_proof_with_refinement(
     dspy_module: Type[Module],
     input: GenProofInput,

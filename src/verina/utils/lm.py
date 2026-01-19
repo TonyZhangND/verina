@@ -1,8 +1,76 @@
+import asyncio
+import logging
 import os
-from typing import Optional
+import random
+from functools import wraps
+from typing import Callable, Optional, TypeVar
 
 import dspy
+import litellm
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
+
+
+def retry_on_rate_limit(
+    max_retries: int = 10,
+    base_delay: float = 10.0,
+    max_delay: float = 120.0,
+):
+    """
+    Decorator that retries async functions on rate limit and transient errors with exponential backoff.
+    Only sleeps when a retryable error is encountered.
+
+    Args:
+        max_retries: Maximum number of retry attempts
+        base_delay: Initial delay in seconds (will be multiplied by 2^attempt)
+        max_delay: Maximum delay between retries in seconds
+    """
+
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        @wraps(func)
+        async def wrapper(*args, **kwargs) -> T:
+            last_exception = None
+            for attempt in range(max_retries + 1):
+                try:
+                    return await func(*args, **kwargs)
+                except litellm.RateLimitError as e:
+                    last_exception = e
+                    if attempt == max_retries:
+                        logger.error(
+                            f"Rate limit exceeded after {max_retries} retries: {e}"
+                        )
+                        raise
+                    # Exponential backoff with jitter for rate limits
+                    delay = min(base_delay * (2**attempt), max_delay)
+                    jitter = random.uniform(0, delay * 0.1)
+                    sleep_time = delay + jitter
+                    logger.warning(
+                        f"Rate limit hit, sleeping {sleep_time:.1f}s before retry {attempt + 1}/{max_retries}"
+                    )
+                    await asyncio.sleep(sleep_time)
+                except litellm.InternalServerError as e:
+                    last_exception = e
+                    if attempt == max_retries:
+                        logger.error(
+                            f"Internal server error after {max_retries} retries: {e}"
+                        )
+                        raise
+                    # Shorter delay for transient network errors
+                    delay = min(2.0 * (2**attempt), 30.0)
+                    jitter = random.uniform(0, delay * 0.1)
+                    sleep_time = delay + jitter
+                    logger.warning(
+                        f"Internal server error (network issue), sleeping {sleep_time:.1f}s before retry {attempt + 1}/{max_retries}"
+                    )
+                    await asyncio.sleep(sleep_time)
+            raise last_exception
+
+        return wrapper
+
+    return decorator
 
 
 class LMConfig(BaseModel):

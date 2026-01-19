@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import dspy
 
+from verina.utils.lm import retry_on_rate_limit
 from verina.baseline.baseline import BaselineSolution
 from verina.baseline.config import BaselineConfig
 from verina.baseline.generate import (
@@ -192,6 +193,7 @@ def parse_model_response(input: GenProofInput, response: str) -> GenProofOutput:
     )
 
 
+@retry_on_rate_limit()
 async def direct_lm_generate(lm: dspy.LM, messages: list[dict[str, str]]) -> str:
     output = await lm.acall(messages=messages)
     return output[0]  # type: ignore
