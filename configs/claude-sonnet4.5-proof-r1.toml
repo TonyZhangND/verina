@@ -1,4 +1,4 @@
-output_dir = "output/claude-sonnet-4.5-proof-64"
+output_dir = "output/claude-sonnet-4.5-proof-r1"
 max_workers = 1
 rounds = 1
 fewshot_example_names = ["verina_basic_15", "verina_basic_44"]
