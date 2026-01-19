@@ -20,8 +20,8 @@ def retry_on_rate_limit(
     max_delay: float = 120.0,
 ):
     """
-    Decorator that retries async functions on rate limit and transient errors with exponential backoff.
-    Only sleeps when a retryable error is encountered.
+    Decorator that retries async functions on rate limit errors with exponential backoff.
+    Only sleeps when a rate limit error is encountered.
 
     Args:
         max_retries: Maximum number of retry attempts
@@ -43,27 +43,12 @@ def retry_on_rate_limit(
                             f"Rate limit exceeded after {max_retries} retries: {e}"
                         )
                         raise
-                    # Exponential backoff with jitter for rate limits
+                    # Exponential backoff with jitter
                     delay = min(base_delay * (2**attempt), max_delay)
                     jitter = random.uniform(0, delay * 0.1)
                     sleep_time = delay + jitter
                     logger.warning(
                         f"Rate limit hit, sleeping {sleep_time:.1f}s before retry {attempt + 1}/{max_retries}"
-                    )
-                    await asyncio.sleep(sleep_time)
-                except litellm.InternalServerError as e:
-                    last_exception = e
-                    if attempt == max_retries:
-                        logger.error(
-                            f"Internal server error after {max_retries} retries: {e}"
-                        )
-                        raise
-                    # Shorter delay for transient network errors
-                    delay = min(2.0 * (2**attempt), 30.0)
-                    jitter = random.uniform(0, delay * 0.1)
-                    sleep_time = delay + jitter
-                    logger.warning(
-                        f"Internal server error (network issue), sleeping {sleep_time:.1f}s before retry {attempt + 1}/{max_retries}"
                     )
                     await asyncio.sleep(sleep_time)
             raise last_exception
